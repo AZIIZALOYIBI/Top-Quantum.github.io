@@ -1,39 +1,36 @@
 # Contribution Guidelines
 
-Thank you for your interest in contributing to **Top1-Quantum-AI**!
-
 ## Getting Started
-1. **Fork the Repository**: Click the 'Fork' button at the top right of this page.
-2. **Clone Your Fork**: Clone your forked repository to your local machine.
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/Top1-Quantum-AI.git
-   cd Top1-Quantum-AI
-   ```
-3. **Create a Branch**: Create a new feature branch off of the `main` branch.
-   ```bash
-   git checkout -b your-feature-name
-   ```
+Welcome! We're excited that you want to contribute to our project. To get started, fork the repository and clone it to your local machine.
+
+## Development Setup
+1. Ensure you have the necessary software installed. Refer to our [Installation Guide](link to installation guide) for details.
+2. Set up a virtual environment:  `python -m venv venv`
+3. Activate the virtual environment:  
+   - On Windows:  `venv\Scripts\activate`
+   - On macOS/Linux:  `source venv/bin/activate`
 
 ## Making Changes
-- Write clear, concise commit messages that explain the context of your changes.
-- Follow the coding style and conventions already established in the project.
+1. Create a new branch for your feature or bug fix:  `git checkout -b feature/my-feature`
+2. Make your changes and ensure code quality and style.
+
+## Code Style
+We follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) coding style guidelines. Ensure your code adheres to these standards.
 
 ## Testing
-- Please ensure that all tests pass before submitting your changes.
-- Add new tests for any new features or bug fixes.
+Before submitting your changes, ensure that all tests pass. Run the following command:  `pytest`
 
-## Submitting Your Contribution
-1. **Push Your Changes**: Push your changes back to your fork.
-   ```bash
-   git push origin your-feature-name
-   ```
-2. **Create a Pull Request**: Navigate to the original repository and click the 'New Pull Request' button. Select your branch and submit your request.
+## Commit Messages
+Use clear, concise commit messages. Start with a verb and use the present tense. Example:  `Add feature to improve performance`
+
+## Submitting Changes
+1. Push your changes to your fork:  `git push origin feature/my-feature`
+2. Open a pull request against the `main` branch of this repository.
+
+## Reporting Issues
+If you encounter any issues, please report them on our [issues page](link to issues page) by providing a detailed description of the problem.
 
 ## Code of Conduct
-By participating in this project, you agree to abide by the [Code of Conduct](CODE_OF_CONDUCT.md).
+We expect all contributors to maintain a welcoming and respectful environment. Please read our [Code of Conduct](link to code of conduct) before participating.
 
-## Questions?
-If you have any questions, feel free to ask!
-
-## Thank You!
-We appreciate your contributions and help in making **Top1-Quantum-AI** better!
+Thank you for contributing!
