@@ -1,255 +1,202 @@
-# تحليل هيكل الكود الكمي - Quantum Code Structure Analysis
+# تكوين Nginx للنظام الأمني الموحد
+# Nginx Configuration for Unified Security System
 
-## المعادلات الرياضية الأساسية
-
-### 1. معادلة هيكل الكود:
-```
-Code_structure = ∑(React_components × Quantum_states × Visual_dynamics)
-```
-
-### 2. معادلة الكفاءة:
-```
-Efficiency = (Functionality × Aesthetics × Performance) / Code_complexity ≈ 97.3%
-```
-
-## التحليل الكمي للمكونات
-
-### React Components (مكونات React)
-```typescript
-// المكون الرئيسي - الوحدة الكمية الأساسية
-const QuantumInvestmentPresentation = () => {
-  // نواة الحوسبة الكمية
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [particleAnimation, setParticleAnimation] = useState(0);
-  
-  // الربط الكمي بين الزمن والحركة
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setParticleAnimation(prev => (prev + 1) % 360);
-    }, 50);
-    return () => clearInterval(interval);
-  }, []);
-  
-  return (
-    // هيكل كمي متقدم
-  );
-};
-```
-
-### تحليل المكونات الفرعية:
-```
-React_components = {
-  Primary: "QuantumInvestmentPresentation",
-  Secondary: ["Header", "Main", "Footer", "Navigation"],
-  Icons: 17, // من مكتبة Lucide React
-  Slides: 3, // شرائح تفاعلية
-  Interactive_elements: 8 // أزرار ومؤشرات
-}
-```
-
-## Quantum States (الحالات الكمية)
-
-### الحالات المحلية (Local Quantum States):
-```typescript
-// حالة الشريحة الحالية - موضع كمي
-const [currentSlide, setCurrentSlide] = useState(0);
-// نطاق: [0, 1, 2] - ثلاث حالات كمية منفصلة
-
-// حالة الرسوم المتحركة - دوران كمي
-const [particleAnimation, setParticleAnimation] = useState(0);
-// نطاق: [0, 359] - دورة كاملة 360 درجة
-```
-
-### الحالات العامة (Global Quantum States):
-```typescript
-// حالة العرض - تراكب كمي
-const [showPresentation, setShowPresentation] = React.useState(false);
-// حالتان: |0⟩ (النظام الرئيسي) و |1⟩ (العرض التقديمي)
-```
-
-### دوال الانتقال الكمي:
-```typescript
-// انتقال كمي للأمام
-const nextSlide = () => {
-  setCurrentSlide((prev) => (prev + 1) % slides.length);
-};
-
-// انتقال كمي للخلف
-const prevSlide = () => {
-  setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-};
-```
-
-## Visual Dynamics (الديناميكيات البصرية)
-
-### 1. الرسوم المتحركة الكمية:
-```typescript
-// الجسيمات الكمية المتحركة
-{[...Array(20)].map((_, i) => (
-  <div
-    key={i}
-    className="absolute w-2 h-2 bg-cyan-400 rounded-full opacity-70 animate-pulse"
-    style={{
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      animationDelay: `${i * 0.2}s`,
-      transform: `rotate(${particleAnimation + i * 18}deg) translateX(${20 + i * 2}px)`
-    }}
-  />
-))}
-```
-
-### 2. معادلة الحركة الكمية:
-```
-Particle_position(t) = {
-  x: cos(ωt + φᵢ) × rᵢ
-  y: sin(ωt + φᵢ) × rᵢ
-  rotation: (particleAnimation + i × 18)°
+events {
+    worker_connections 1024;
 }
 
-حيث:
-- ω = 2π/50ms (التردد الزاوي)
-- φᵢ = i × 18° (الإزاحة الطورية)
-- rᵢ = 20 + i × 2 (نصف القطر)
-```
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
 
-### 3. التأثيرات البصرية المتقدمة:
-```css
-/* رسوم متحركة مخصصة */
-@keyframes twinkle {
-  0%, 100% { 
-    opacity: 0.3; 
-    transform: scale(1); 
-  }
-  50% { 
-    opacity: 1; 
-    transform: scale(1.2); 
-  }
+    # تكوين السجلات
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log /var/log/nginx/access.log main;
+    error_log /var/log/nginx/error.log warn;
+
+    # تحسينات الأداء
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+    client_max_body_size 10M;
+
+    # ضغط البيانات
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        text/javascript
+        application/javascript
+        application/xml+rss
+        application/json;
+
+    # تحديد معدل الطلبات
+    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+    limit_req_zone $binary_remote_addr zone=login:10m rate=5r/m;
+
+    # إعادة توجيه HTTP إلى HTTPS
+    server {
+        listen 80;
+        server_name yourdomain.com www.yourdomain.com;
+        return 301 https://$server_name$request_uri;
+    }
+
+    # الخادم الرئيسي مع HTTPS
+    server {
+        listen 443 ssl http2;
+        server_name yourdomain.com www.yourdomain.com;
+
+        # شهادات SSL
+        ssl_certificate /etc/nginx/ssl/cert.pem;
+        ssl_certificate_key /etc/nginx/ssl/key.pem;
+        
+        # تكوين SSL الآمن (حديث)
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;
+        ssl_prefer_server_ciphers off;
+        ssl_session_cache shared:SSL:10m;
+        ssl_session_timeout 1d;
+        ssl_session_tickets off;
+        
+        # OCSP stapling
+        ssl_stapling on;
+        ssl_stapling_verify on;
+
+        # رؤوس الأمان
+        add_header X-Frame-Options DENY always;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.openai.com; font-src 'self';" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+        # تحديد معدل طلبات تسجيل الدخول
+        location /api/auth {
+            limit_req zone=login burst=10 nodelay;
+            proxy_pass http://quantum-server:3001;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+        }
+
+        # API endpoints
+        location /api {
+            limit_req zone=api burst=20 nodelay;
+            proxy_pass http://quantum-server:3001;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+            
+            # مهلة زمنية للطلبات الطويلة
+            proxy_connect_timeout 30s;
+            proxy_send_timeout 30s;
+            proxy_read_timeout 30s;
+        }
+
+        # فحص الصحة
+        location /health {
+            proxy_pass http://quantum-server:3001;
+            access_log off;
+        }
+
+        # الملفات الثابتة والتطبيق الرئيسي
+        location / {
+            proxy_pass http://quantum-frontend:5173;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+            
+            # cache static assets
+            location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+                expires 1y;
+                add_header Cache-Control "public, immutable";
+                add_header X-Frame-Options DENY always;
+                add_header X-Content-Type-Options nosniff always;
+            }
+        }
+
+        # منع الوصول للملفات الحساسة
+        location ~ /\. {
+            deny all;
+            access_log off;
+            log_not_found off;
+        }
+
+        location ~ \.(env|conf|log)$ {
+            deny all;
+            access_log off;
+            log_not_found off;
+        }
+    }
+
+    # Grafana Dashboard
+    server {
+        listen 443 ssl http2;
+        server_name grafana.yourdomain.com;
+
+        ssl_certificate /etc/nginx/ssl/cert.pem;
+        ssl_certificate_key /etc/nginx/ssl/key.pem;
+        ssl_protocols TLSv1.2 TLSv1.3;
+
+        location / {
+            proxy_pass http://grafana:3000;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+
+    # Kibana Dashboard
+    server {
+        listen 443 ssl http2;
+        server_name kibana.yourdomain.com;
+
+        ssl_certificate /etc/nginx/ssl/cert.pem;
+        ssl_certificate_key /etc/nginx/ssl/key.pem;
+        ssl_protocols TLSv1.2 TLSv1.3;
+
+        location / {
+            proxy_pass http://kibana:5601;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+
+    # حماية من البوتات والمتطفلين
+    server {
+        listen 80 default_server;
+        listen 443 ssl default_server;
+        server_name _;
+        
+        ssl_certificate /etc/nginx/ssl/cert.pem;
+        ssl_certificate_key /etc/nginx/ssl/key.pem;
+        
+        return 444;
+    }
 }
-
-/* تأثيرات كمية */
-.quantum-particle {
-  animation: twinkle 2-5s infinite;
-  background: radial-gradient(circle, cyan, transparent);
-}
-```
-
-## useEffect - الربط الكمي الزمني
-
-### التحليل العميق:
-```typescript
-useEffect(() => {
-  // إنشاء حلقة زمنية كمية
-  const interval = setInterval(() => {
-    // تحديث الحالة الكمية كل 50ms
-    setParticleAnimation(prev => (prev + 1) % 360);
-  }, 50);
-  
-  // تنظيف الذاكرة - مبدأ عدم اليقين الكمي
-  return () => clearInterval(interval);
-}, []); // مصفوفة التبعيات الفارغة = تأثير مستقل
-```
-
-### الخصائص الكمية:
-- **التردد**: 20 Hz (50ms interval)
-- **الدورة الكاملة**: 18 ثانية (360 × 50ms)
-- **استهلاك الذاكرة**: محسّن مع cleanup
-- **الأداء**: 60 FPS متوافق
-
-## حساب الكفاءة الكمية
-
-### المعادلة التفصيلية:
-```
-Efficiency = (Functionality × Aesthetics × Performance) / Code_complexity
-
-حيث:
-Functionality = 0.95 (95% من الميزات المطلوبة)
-Aesthetics = 0.98 (98% جودة بصرية)
-Performance = 0.96 (96% أداء محسّن)
-Code_complexity = 0.92 (92% بساطة في التعقيد)
-
-Efficiency = (0.95 × 0.98 × 0.96) / 0.92 = 0.973 = 97.3%
-```
-
-### تفصيل النتيجة:
-- **الوظائف (Functionality)**: 95%
-  - تنقل سلس بين الشرائح ✓
-  - رسوم متحركة تفاعلية ✓
-  - تصميم متجاوب ✓
-  - إدارة حالة فعالة ✓
-  - تبديل بين الأنظمة ✓
-
-- **الجماليات (Aesthetics)**: 98%
-  - تدرجات لونية متقدمة ✓
-  - رسوم متحركة سلسة ✓
-  - تأثيرات بصرية مذهلة ✓
-  - تصميم عصري ✓
-  - تناسق بصري ✓
-
-- **الأداء (Performance)**: 96%
-  - استخدام محسّن للذاكرة ✓
-  - رسوم متحركة محسّنة ✓
-  - تحميل سريع ✓
-  - استجابة فورية ✓
-  - تنظيف الموارد ✓
-
-- **تعقيد الكود (Code Complexity)**: 92% (بساطة)
-  - هيكل واضح ومنطقي ✓
-  - تعليقات وافية ✓
-  - فصل الاهتمامات ✓
-  - قابلية الصيانة ✓
-
-## التحليل الكمي المتقدم
-
-### 1. معادلة الطاقة الكمية للنظام:
-```
-E_system = ∑ᵢ ħωᵢ(nᵢ + 1/2)
-
-حيث:
-- ħ = ثابت بلانك المختزل
-- ωᵢ = تردد المكون i
-- nᵢ = عدد الكوانتا في المكون i
-```
-
-### 2. دالة الموجة للنظام:
-```
-Ψ(x,t) = ∑ᵢ cᵢ|ψᵢ⟩e^(-iEᵢt/ħ)
-
-حيث:
-- cᵢ = معاملات التراكب
-- |ψᵢ⟩ = حالات النظام الأساسية
-- Eᵢ = طاقات الحالات
-```
-
-### 3. مصفوفة الكثافة:
-```
-ρ = |Ψ⟩⟨Ψ| = ∑ᵢⱼ cᵢcⱼ*|ψᵢ⟩⟨ψⱼ|
-```
-
-## الخصائص التقنية المتقدمة
-
-### الأمان الكمي:
-- تشفير الحالات باستخدام React keys
-- حماية من memory leaks مع cleanup
-- validation للمدخلات
-
-### القابلية للتوسع:
-- هيكل modular قابل للتوسع
-- إمكانية إضافة شرائح جديدة
-- دعم للغات متعددة
-
-### التوافق:
-- متوافق مع جميع المتصفحات الحديثة
-- دعم الأجهزة المحمولة
-- تحسين لمحركات البحث
-
-## الخلاصة الكمية
-
-النظام يحقق كفاءة كمية مثبتة بنسبة **97.3%** من خلال:
-
-1. **التكامل المثالي** بين مكونات React والحالات الكمية
-2. **الديناميكيات البصرية المتقدمة** مع 20+ تأثير متحرك
-3. **الأداء المحسّن** باستخدام useEffect وتنظيف الذاكرة
-4. **البساطة في التعقيد** مع هيكل واضح ومنطقي
-
-النتيجة: نظام كمي متكامل يجمع بين الجمال والوظائف والأداء العالي.
