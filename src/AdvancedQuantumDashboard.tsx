@@ -89,8 +89,8 @@ const AdvancedQuantumDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
-  const [_notifications] = useState<Notification[]>([]);
-  const [_isLoading] = useState(false);
+  const [notifications] = useState<Notification[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // بيانات النظام
   const [quantumStates, setQuantumStates] = useState<QuantumState[]>([]);
@@ -408,9 +408,14 @@ const AdvancedQuantumDashboard: React.FC = () => {
           
           <div className="flex items-center gap-4">
             <button
-              onClick={() => updateSystemData()}
+              onClick={() => {
+                setIsRefreshing(true);
+                updateSystemData().finally(() => {
+                  setTimeout(() => setIsRefreshing(false), 500);
+                });
+              }}
               className={`p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors ${
-                _isLoading ? 'animate-spin' : ''
+                isRefreshing ? 'animate-spin' : ''
               }`}
             >
               <RefreshCw className="w-5 h-5" />
@@ -418,7 +423,7 @@ const AdvancedQuantumDashboard: React.FC = () => {
             
             <button className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors relative">
               <Bell className="w-5 h-5" />
-              {_notifications.length > 0 && (
+              {notifications.length > 0 && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
               )}
             </button>

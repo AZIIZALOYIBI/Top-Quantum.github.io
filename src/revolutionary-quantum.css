@@ -1,35 +1,5 @@
 /* النظام الكمي الثوري - التأثيرات البصرية المتقدمة */
-
-/* الجسيمات الكمية المتحركة */
-@keyframes quantumFloat {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-    opacity: 0.8;
-  }
-  25% {
-    transform: translateY(-5px) rotate(45deg);
-    opacity: 0.9;
-  }
-  50% {
-    transform: translateY(-8px) rotate(90deg);
-    opacity: 1;
-  }
-  75% {
-    transform: translateY(-5px) rotate(135deg);
-    opacity: 0.9;
-  }
-}
-
-@keyframes quantumPulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 0 15px rgba(174, 174, 178, 0.3);
-  }
-  50% {
-    transform: scale(1.02);
-    box-shadow: 0 0 25px rgba(174, 174, 178, 0.5);
-  }
-}
+/* Note: quantumFloat, quantumPulse, quantumGlow defined in index.css */
 
 @keyframes revolutionGlow {
   0%, 100% {
