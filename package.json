@@ -28,6 +28,7 @@
     "clean": "rm -rf dist node_modules/.vite"
   },
   "dependencies": {
+    "@types/react-router-dom": "^5.3.3",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
@@ -36,14 +37,17 @@
     "express-rate-limit": "^7.1.5",
     "framer-motion": "^12.36.0",
     "helmet": "^7.1.0",
+    "html2canvas": "^1.4.1",
     "ioredis": "^5.3.2",
     "jsonwebtoken": "^9.0.2",
+    "jspdf": "^4.2.0",
     "lucide-react": "^0.263.1",
     "mongoose": "^8.0.3",
     "morgan": "^1.10.0",
     "openai": "^5.12.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.13.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
