@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Activity,
@@ -38,6 +39,7 @@ import {
   XCircle,
   CheckCircle,
   AlertOctagon,
+  LogOut,
 } from 'lucide-react';
 import AIAnalysisDashboard from './components/AIAnalysisDashboard';
 import {
@@ -253,6 +255,7 @@ const StatusPill: React.FC<{ status: string }> = ({ status }) => {
 // ═══════════════════════════════════════════════════════════════
 
 const AdvancedQuantumDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode] = useState(true);
@@ -484,6 +487,14 @@ const AdvancedQuantumDashboard: React.FC = () => {
           </div>
           <button className="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-colors">
             <User className="w-4 h-4 text-gray-400" />
+          </button>
+          <button
+            onClick={() => { localStorage.removeItem('quantum_onboarding_seen'); navigate('/'); }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-colors text-red-400 hover:text-red-300"
+            title="تسجيل الخروج"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="text-xs font-medium">خروج</span>
           </button>
         </div>
       </div>
