@@ -9,6 +9,14 @@ dist/
 .env.*
 !.env.example
 
+# Secrets & credentials — never commit
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+
 # Logs
 *.log
 npm-debug.log*
