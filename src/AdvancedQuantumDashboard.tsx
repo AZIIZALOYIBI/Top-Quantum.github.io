@@ -1957,7 +1957,7 @@ const AdvancedQuantumDashboard: React.FC = () => {
 
   const executeAction = useCallback(
     (id: string, name: string) => {
-      if (runningAction != null) return;
+      if (runningAction !== null) return;
       setRunningAction(id);
       const duration = 1500 + Math.random() * 2000;
       setTimeout(() => {
@@ -1974,7 +1974,7 @@ const AdvancedQuantumDashboard: React.FC = () => {
         );
       }, duration);
     },
-    [runningAction]
+    [runningAction, addNotification]
   );
 
   const renderActions = () => {
@@ -2172,7 +2172,7 @@ const AdvancedQuantumDashboard: React.FC = () => {
                       >
                         {action.icon}
                       </div>
-                      {histEntry != null && !isRunning && (
+                      {histEntry !== null && histEntry !== undefined && !isRunning && (
                         <span
                           className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 ${
                             histEntry.status === 'success'
@@ -2190,7 +2190,7 @@ const AdvancedQuantumDashboard: React.FC = () => {
                     </div>
                     <button
                       onClick={() => executeAction(action.id, action.name)}
-                      disabled={runningAction != null}
+                      disabled={runningAction !== null}
                       className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-white transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed ${variantClasses[action.variant]}`}
                     >
                       {isRunning ? (
