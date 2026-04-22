@@ -1,18 +1,26 @@
 /**
  * Small component tests for RouteGuards, OnboardingTour, ExportToolbar, and NotificationCenter
  */
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
+
+import ExportToolbar from '../src/components/ExportToolbar';
+import NotificationCenter, { NotificationBell } from '../src/components/NotificationCenter';
+import OnboardingTour from '../src/components/OnboardingTour';
+import { ProtectedRoute, AdminRoute, GuestRoute } from '../src/components/RouteGuards';
+import { isAuthenticated } from '../src/services/apiClient';
+import { getCurrentUser } from '../src/services/subscriptionService';
 
 // Mock framer-motion
 jest.mock('framer-motion', () => ({
   motion: {
     div: ({ children, ...p }: React.HTMLProps<HTMLDivElement>) => <div {...p}>{children}</div>,
     span: ({ children, ...p }: React.HTMLProps<HTMLSpanElement>) => <span {...p}>{children}</span>,
-    button: ({ children, ...p }: React.HTMLProps<HTMLButtonElement>) =>
-      <button {...(p as React.ButtonHTMLAttributes<HTMLButtonElement>)}>{children}</button>,
+    button: ({ children, ...p }: React.HTMLProps<HTMLButtonElement>) => (
+      <button {...(p as React.ButtonHTMLAttributes<HTMLButtonElement>)}>{children}</button>
+    ),
     p: ({ children, ...p }: React.HTMLProps<HTMLParagraphElement>) => <p {...p}>{children}</p>,
     h2: ({ children, ...p }: React.HTMLProps<HTMLHeadingElement>) => <h2 {...p}>{children}</h2>,
     h3: ({ children, ...p }: React.HTMLProps<HTMLHeadingElement>) => <h3 {...p}>{children}</h3>,
@@ -34,13 +42,6 @@ jest.mock('../src/services/apiClient', () => ({
   clearToken: jest.fn(),
 }));
 
-import { ProtectedRoute, AdminRoute, GuestRoute } from '../src/components/RouteGuards';
-import OnboardingTour from '../src/components/OnboardingTour';
-import ExportToolbar from '../src/components/ExportToolbar';
-import NotificationCenter, { NotificationBell } from '../src/components/NotificationCenter';
-import { isAuthenticated } from '../src/services/apiClient';
-import { getCurrentUser } from '../src/services/subscriptionService';
-
 // ─── RouteGuards ──────────────────────────────────────────
 
 describe('RouteGuards', () => {
@@ -51,10 +52,15 @@ describe('RouteGuards', () => {
       render(
         <MemoryRouter initialEntries={['/protected']}>
           <Routes>
-            <Route path="/protected" element={
-              <ProtectedRoute><div data-testid="protected">Protected Content</div></ProtectedRoute>
-            } />
-            <Route path="/login" element={<div>Login</div>} />
+            <Route
+              path='/protected'
+              element={
+                <ProtectedRoute>
+                  <div data-testid='protected'>Protected Content</div>
+                </ProtectedRoute>
+              }
+            />
+            <Route path='/login' element={<div>Login</div>} />
           </Routes>
         </MemoryRouter>
       );
@@ -67,10 +73,15 @@ describe('RouteGuards', () => {
       render(
         <MemoryRouter initialEntries={['/protected']}>
           <Routes>
-            <Route path="/protected" element={
-              <ProtectedRoute><div data-testid="protected">Protected</div></ProtectedRoute>
-            } />
-            <Route path="/login" element={<div data-testid="login">Login Page</div>} />
+            <Route
+              path='/protected'
+              element={
+                <ProtectedRoute>
+                  <div data-testid='protected'>Protected</div>
+                </ProtectedRoute>
+              }
+            />
+            <Route path='/login' element={<div data-testid='login'>Login Page</div>} />
           </Routes>
         </MemoryRouter>
       );
@@ -81,15 +92,24 @@ describe('RouteGuards', () => {
   describe('AdminRoute', () => {
     it('should redirect when user is not an admin', () => {
       (isAuthenticated as jest.Mock).mockReturnValue(true);
-      (getCurrentUser as jest.Mock).mockReturnValue({ id: '1', email: 'test@test.com', role: 'user' });
+      (getCurrentUser as jest.Mock).mockReturnValue({
+        id: '1',
+        email: 'test@test.com',
+        role: 'user',
+      });
       render(
         <MemoryRouter initialEntries={['/admin']}>
           <Routes>
-            <Route path="/admin" element={
-              <AdminRoute><div data-testid="admin">Admin</div></AdminRoute>
-            } />
-            <Route path="/login" element={<div data-testid="login">Login</div>} />
-            <Route path="/dashboard" element={<div data-testid="dashboard">Dashboard</div>} />
+            <Route
+              path='/admin'
+              element={
+                <AdminRoute>
+                  <div data-testid='admin'>Admin</div>
+                </AdminRoute>
+              }
+            />
+            <Route path='/login' element={<div data-testid='login'>Login</div>} />
+            <Route path='/dashboard' element={<div data-testid='dashboard'>Dashboard</div>} />
           </Routes>
         </MemoryRouter>
       );
@@ -100,16 +120,23 @@ describe('RouteGuards', () => {
     it('should render admin content when user is admin', () => {
       (isAuthenticated as jest.Mock).mockReturnValue(true);
       (getCurrentUser as jest.Mock).mockReturnValue({
-        id: '1', email: 'admin@test.com', role: 'admin',
+        id: '1',
+        email: 'admin@test.com',
+        role: 'admin',
         subscription: { planId: 'enterprise' },
       });
       render(
         <MemoryRouter initialEntries={['/admin']}>
           <Routes>
-            <Route path="/admin" element={
-              <AdminRoute><div data-testid="admin">Admin Content</div></AdminRoute>
-            } />
-            <Route path="/dashboard" element={<div data-testid="dashboard">Dashboard</div>} />
+            <Route
+              path='/admin'
+              element={
+                <AdminRoute>
+                  <div data-testid='admin'>Admin Content</div>
+                </AdminRoute>
+              }
+            />
+            <Route path='/dashboard' element={<div data-testid='dashboard'>Dashboard</div>} />
           </Routes>
         </MemoryRouter>
       );
@@ -123,7 +150,9 @@ describe('RouteGuards', () => {
       (getCurrentUser as jest.Mock).mockReturnValue(null);
       render(
         <MemoryRouter>
-          <GuestRoute><div data-testid="guest">Guest Content</div></GuestRoute>
+          <GuestRoute>
+            <div data-testid='guest'>Guest Content</div>
+          </GuestRoute>
         </MemoryRouter>
       );
       expect(screen.getByTestId('guest')).toBeInTheDocument();
@@ -135,10 +164,15 @@ describe('RouteGuards', () => {
       render(
         <MemoryRouter>
           <Routes>
-            <Route path="/" element={
-              <GuestRoute><div data-testid="guest">Guest</div></GuestRoute>
-            } />
-            <Route path="/dashboard" element={<div data-testid="dashboard">Dashboard</div>} />
+            <Route
+              path='/'
+              element={
+                <GuestRoute>
+                  <div data-testid='guest'>Guest</div>
+                </GuestRoute>
+              }
+            />
+            <Route path='/dashboard' element={<div data-testid='dashboard'>Dashboard</div>} />
           </Routes>
         </MemoryRouter>
       );
@@ -205,28 +239,27 @@ describe('OnboardingTour', () => {
 
 describe('ExportToolbar', () => {
   it('should render without crashing when feature is enabled', () => {
-    const { getCurrentUser: mockGetUser } = jest.requireMock('../src/services/subscriptionService') as {
-      getCurrentUser: jest.Mock;
-    };
+    const { getCurrentUser: mockGetUser } = jest.requireMock('../src/services/subscriptionService');
     mockGetUser.mockReturnValue({
-      id: '1', email: 'test@test.com',
+      id: '1',
+      email: 'test@test.com',
       subscription: { planId: 'professional' },
     });
     // Mock hasFeature to return true so the toolbar renders
-    const subModule = jest.requireMock('../src/services/subscriptionService') as Record<string, jest.Mock>;
+    const subModule = jest.requireMock('../src/services/subscriptionService');
     if (subModule['hasFeature']) {
       subModule['hasFeature'].mockReturnValue(true);
     }
-    const { container } = render(<ExportToolbar tabName="dashboard" />);
+    const { container } = render(<ExportToolbar tabName='dashboard' />);
     expect(container).toBeTruthy();
   });
 
   it('should return null when hasPdfExport feature is not available', () => {
-    const subModule = jest.requireMock('../src/services/subscriptionService') as Record<string, jest.Mock>;
+    const subModule = jest.requireMock('../src/services/subscriptionService');
     if (subModule['hasFeature']) {
       subModule['hasFeature'].mockReturnValue(false);
     }
-    const { container } = render(<ExportToolbar tabName="dashboard" />);
+    const { container } = render(<ExportToolbar tabName='dashboard' />);
     // When feature not enabled, ExportToolbar returns null
     expect(container.firstChild).toBeNull();
   });

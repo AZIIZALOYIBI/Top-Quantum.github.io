@@ -16,7 +16,12 @@ const defaultResponse: AIResponse = {
 };
 
 export const aiService = {
-  sendMessage: async (_message: string, _personality?: string): Promise<AIResponse> =>
-    defaultResponse,
-  clearHistory: (): void => { /* no-op */ },
+  sendMessage: (message: string, personality?: string): Promise<AIResponse> => {
+    void message;
+    void personality;
+    return Promise.resolve(defaultResponse);
+  },
+  clearHistory: (): void => {
+    /* no-op */
+  },
 };

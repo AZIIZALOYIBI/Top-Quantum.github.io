@@ -7,9 +7,21 @@
  * - CommandPalette
  * - ExportToolbar
  */
-import React from 'react';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+
+// ─── Imports ───────────────────────────────────────────────
+
+import AdvancedSettings from '../src/components/AdvancedSettings';
+import AIAnalysisDashboard from '../src/components/AIAnalysisDashboard';
+import ApiKeysDashboard from '../src/components/ApiKeysDashboard';
+import ExportToolbar from '../src/components/ExportToolbar';
+import CommandPalette from '../src/components/revolutionary/CommandPalette';
+import PracticalApplication from '../src/components/revolutionary/PracticalApplication';
+import { isApiKeyConfigured, sendChatMessage } from '../src/services/groqService';
+import { exportDashboardSnapshot, exportDataReport } from '../src/services/reportExporter';
+import { hasFeature } from '../src/services/subscriptionService';
 
 // ─── Global mocks ──────────────────────────────────────────
 
@@ -17,19 +29,23 @@ jest.mock('framer-motion', () => ({
   motion: {
     div: ({ children, ...p }: React.HTMLProps<HTMLDivElement>) => <div {...p}>{children}</div>,
     span: ({ children, ...p }: React.HTMLProps<HTMLSpanElement>) => <span {...p}>{children}</span>,
-    button: ({ children, ...p }: React.HTMLProps<HTMLButtonElement>) =>
-      <button {...(p as React.ButtonHTMLAttributes<HTMLButtonElement>)}>{children}</button>,
+    button: ({ children, ...p }: React.HTMLProps<HTMLButtonElement>) => (
+      <button {...(p as React.ButtonHTMLAttributes<HTMLButtonElement>)}>{children}</button>
+    ),
     p: ({ children, ...p }: React.HTMLProps<HTMLParagraphElement>) => <p {...p}>{children}</p>,
     h2: ({ children, ...p }: React.HTMLProps<HTMLHeadingElement>) => <h2 {...p}>{children}</h2>,
     h3: ({ children, ...p }: React.HTMLProps<HTMLHeadingElement>) => <h3 {...p}>{children}</h3>,
     ul: ({ children, ...p }: React.HTMLProps<HTMLUListElement>) => <ul {...p}>{children}</ul>,
     li: ({ children, ...p }: React.HTMLProps<HTMLLIElement>) => <li {...p}>{children}</li>,
-    textarea: (p: React.HTMLProps<HTMLTextAreaElement>) =>
-      <textarea {...(p as React.TextareaHTMLAttributes<HTMLTextAreaElement>)} />,
-    form: ({ children, ...p }: React.HTMLProps<HTMLFormElement>) =>
-      <form {...(p as React.FormHTMLAttributes<HTMLFormElement>)}>{children}</form>,
-    input: (p: React.HTMLProps<HTMLInputElement>) =>
-      <input {...(p as React.InputHTMLAttributes<HTMLInputElement>)} />,
+    textarea: (p: React.HTMLProps<HTMLTextAreaElement>) => (
+      <textarea {...(p as React.TextareaHTMLAttributes<HTMLTextAreaElement>)} />
+    ),
+    form: ({ children, ...p }: React.HTMLProps<HTMLFormElement>) => (
+      <form {...(p as React.FormHTMLAttributes<HTMLFormElement>)}>{children}</form>
+    ),
+    input: (p: React.HTMLProps<HTMLInputElement>) => (
+      <input {...(p as React.InputHTMLAttributes<HTMLInputElement>)} />
+    ),
   },
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useAnimation: () => ({ start: jest.fn(), stop: jest.fn() }),
@@ -72,18 +88,6 @@ jest.mock('../src/services/reportExporter', () => ({
 Object.assign(navigator, {
   clipboard: { writeText: jest.fn().mockResolvedValue(undefined) },
 });
-
-// ─── Imports ───────────────────────────────────────────────
-
-import PracticalApplication from '../src/components/revolutionary/PracticalApplication';
-import AIAnalysisDashboard from '../src/components/AIAnalysisDashboard';
-import AdvancedSettings from '../src/components/AdvancedSettings';
-import ApiKeysDashboard from '../src/components/ApiKeysDashboard';
-import CommandPalette from '../src/components/revolutionary/CommandPalette';
-import ExportToolbar from '../src/components/ExportToolbar';
-import { isApiKeyConfigured, sendChatMessage } from '../src/services/groqService';
-import { hasFeature } from '../src/services/subscriptionService';
-import { exportDashboardSnapshot, exportDataReport } from '../src/services/reportExporter';
 
 // ─── Helpers ───────────────────────────────────────────────
 
@@ -242,7 +246,7 @@ describe('AIAnalysisDashboard', () => {
   });
 
   it('handles system analysis button click', async () => {
-    const { analyzeSystemData } = jest.requireMock('../src/services/groqService') as Record<string, jest.Mock>;
+    const { analyzeSystemData } = jest.requireMock('../src/services/groqService');
     analyzeSystemData.mockResolvedValue('تحليل النظام جيد');
     render(<AIAnalysisDashboard />);
     const sysBtn = screen.getByText('تحليل النظام').closest('button');
@@ -254,7 +258,7 @@ describe('AIAnalysisDashboard', () => {
   });
 
   it('handles security analysis button click', async () => {
-    const { analyzeSecurityThreats } = jest.requireMock('../src/services/groqService') as Record<string, jest.Mock>;
+    const { analyzeSecurityThreats } = jest.requireMock('../src/services/groqService');
     analyzeSecurityThreats.mockResolvedValue('لا تهديدات');
     render(<AIAnalysisDashboard />);
     const secBtn = screen.getByText('تحليل الأمان').closest('button');
@@ -266,7 +270,7 @@ describe('AIAnalysisDashboard', () => {
   });
 
   it('handles quantum analysis button click', async () => {
-    const { analyzeQuantumPerformance } = jest.requireMock('../src/services/groqService') as Record<string, jest.Mock>;
+    const { analyzeQuantumPerformance } = jest.requireMock('../src/services/groqService');
     analyzeQuantumPerformance.mockResolvedValue('أداء كمي جيد');
     render(<AIAnalysisDashboard />);
     const qBtn = screen.getByText('تحليل كمي').closest('button');
@@ -301,7 +305,7 @@ describe('AIAnalysisDashboard', () => {
   });
 
   it('handles errors from analyzeSystemData gracefully', async () => {
-    const { analyzeSystemData } = jest.requireMock('../src/services/groqService') as Record<string, jest.Mock>;
+    const { analyzeSystemData } = jest.requireMock('../src/services/groqService');
     analyzeSystemData.mockRejectedValue(new Error('network error'));
     render(<AIAnalysisDashboard />);
     const sysBtn = screen.getByText('تحليل النظام').closest('button');
@@ -497,8 +501,8 @@ describe('ApiKeysDashboard', () => {
     render(<ApiKeysDashboard onClose={onClose} />);
     // The X button in the header
     const buttons = screen.getAllByRole('button');
-    const closeBtn = buttons.find(btn =>
-      btn.querySelector('svg') !== null && btn.className.includes('hover:bg-gray-800')
+    const closeBtn = buttons.find(
+      btn => btn.querySelector('svg') !== null && btn.className.includes('hover:bg-gray-800')
     );
     if (closeBtn) {
       fireEvent.click(closeBtn);
@@ -556,7 +560,7 @@ describe('CommandPalette', () => {
       id: 'cmd-1',
       label: 'Toggle Theme',
       labelAr: 'تبديل الثيم',
-      icon: () => <span data-testid="icon-1">⚙</span>,
+      icon: () => <span data-testid='icon-1'>⚙</span>,
       category: 'theme' as const,
       action: jest.fn(),
       shortcut: 'Ctrl+T',
@@ -565,7 +569,7 @@ describe('CommandPalette', () => {
       id: 'cmd-2',
       label: 'Go to Dashboard',
       labelAr: 'لوحة التحكم',
-      icon: () => <span data-testid="icon-2">🏠</span>,
+      icon: () => <span data-testid='icon-2'>🏠</span>,
       category: 'navigation' as const,
       action: jest.fn(),
     },
@@ -573,7 +577,7 @@ describe('CommandPalette', () => {
       id: 'cmd-3',
       label: 'Quantum Simulate',
       labelAr: 'محاكاة كمية',
-      icon: () => <span data-testid="icon-3">⚛</span>,
+      icon: () => <span data-testid='icon-3'>⚛</span>,
       category: 'quantum' as const,
       action: jest.fn(),
     },
@@ -582,7 +586,7 @@ describe('CommandPalette', () => {
   beforeEach(() => {
     onClose.mockClear();
     setCommandQuery.mockClear();
-    mockCommands.forEach(cmd => (cmd.action as jest.Mock).mockClear());
+    mockCommands.forEach(cmd => cmd.action.mockClear());
   });
 
   it('returns null when isOpen is false', () => {
@@ -590,7 +594,7 @@ describe('CommandPalette', () => {
       <CommandPalette
         isOpen={false}
         onClose={onClose}
-        commandQuery=""
+        commandQuery=''
         setCommandQuery={setCommandQuery}
         filteredCommands={mockCommands}
       />
@@ -603,7 +607,7 @@ describe('CommandPalette', () => {
       <CommandPalette
         isOpen={true}
         onClose={onClose}
-        commandQuery=""
+        commandQuery=''
         setCommandQuery={setCommandQuery}
         filteredCommands={mockCommands}
       />
@@ -616,7 +620,7 @@ describe('CommandPalette', () => {
       <CommandPalette
         isOpen={true}
         onClose={onClose}
-        commandQuery=""
+        commandQuery=''
         setCommandQuery={setCommandQuery}
         filteredCommands={mockCommands}
       />
@@ -629,7 +633,7 @@ describe('CommandPalette', () => {
       <CommandPalette
         isOpen={true}
         onClose={onClose}
-        commandQuery=""
+        commandQuery=''
         setCommandQuery={setCommandQuery}
         filteredCommands={mockCommands}
       />
@@ -644,7 +648,7 @@ describe('CommandPalette', () => {
       <CommandPalette
         isOpen={true}
         onClose={onClose}
-        commandQuery=""
+        commandQuery=''
         setCommandQuery={setCommandQuery}
         filteredCommands={mockCommands}
       />
@@ -659,7 +663,7 @@ describe('CommandPalette', () => {
       <CommandPalette
         isOpen={true}
         onClose={onClose}
-        commandQuery="nonexistent"
+        commandQuery='nonexistent'
         setCommandQuery={setCommandQuery}
         filteredCommands={[]}
       />
@@ -672,7 +676,7 @@ describe('CommandPalette', () => {
       <CommandPalette
         isOpen={true}
         onClose={onClose}
-        commandQuery=""
+        commandQuery=''
         setCommandQuery={setCommandQuery}
         filteredCommands={mockCommands}
       />
@@ -687,7 +691,7 @@ describe('CommandPalette', () => {
       <CommandPalette
         isOpen={true}
         onClose={onClose}
-        commandQuery=""
+        commandQuery=''
         setCommandQuery={setCommandQuery}
         filteredCommands={mockCommands}
       />
@@ -702,7 +706,7 @@ describe('CommandPalette', () => {
       <CommandPalette
         isOpen={true}
         onClose={onClose}
-        commandQuery=""
+        commandQuery=''
         setCommandQuery={setCommandQuery}
         filteredCommands={mockCommands}
       />
@@ -719,7 +723,7 @@ describe('CommandPalette', () => {
       <CommandPalette
         isOpen={true}
         onClose={onClose}
-        commandQuery=""
+        commandQuery=''
         setCommandQuery={setCommandQuery}
         filteredCommands={mockCommands}
       />
@@ -732,7 +736,7 @@ describe('CommandPalette', () => {
       <CommandPalette
         isOpen={true}
         onClose={onClose}
-        commandQuery=""
+        commandQuery=''
         setCommandQuery={setCommandQuery}
         filteredCommands={mockCommands}
       />
@@ -745,12 +749,12 @@ describe('CommandPalette', () => {
       <CommandPalette
         isOpen={true}
         onClose={onClose}
-        commandQuery="test query"
+        commandQuery='test query'
         setCommandQuery={setCommandQuery}
         filteredCommands={[]}
       />
     );
-    const input = screen.getByPlaceholderText(/ابحث عن الأوامر/) as HTMLInputElement;
+    const input = screen.getByPlaceholderText(/ابحث عن الأوامر/);
     expect(input.value).toBe('test query');
   });
 });
@@ -765,12 +769,12 @@ describe('ExportToolbar (additional coverage)', () => {
   });
 
   it('renders export button when feature is enabled', () => {
-    render(<ExportToolbar tabName="لوحة التحكم" />);
+    render(<ExportToolbar tabName='لوحة التحكم' />);
     expect(screen.getByText('تصدير')).toBeInTheDocument();
   });
 
   it('opens dropdown menu when export button is clicked', async () => {
-    render(<ExportToolbar tabName="لوحة التحكم" />);
+    render(<ExportToolbar tabName='لوحة التحكم' />);
     const exportBtn = screen.getByText('تصدير');
     fireEvent.click(exportBtn);
     await waitFor(() => {
@@ -779,7 +783,7 @@ describe('ExportToolbar (additional coverage)', () => {
   });
 
   it('closes menu and calls exportDashboardSnapshot on snapshot click', async () => {
-    render(<ExportToolbar tabName="لوحة التحكم" />);
+    render(<ExportToolbar tabName='لوحة التحكم' />);
     fireEvent.click(screen.getByText('تصدير'));
     await waitFor(() => screen.getByText('لقطة الشاشة (PDF)'));
     fireEvent.click(screen.getByText('لقطة الشاشة (PDF)'));
@@ -790,7 +794,7 @@ describe('ExportToolbar (additional coverage)', () => {
 
   it('shows data report button when sections are provided', async () => {
     const sections = [{ title: 'قسم 1', data: [{ label: 'A', value: '1' }] }];
-    render(<ExportToolbar tabName="تقرير" sections={sections} />);
+    render(<ExportToolbar tabName='تقرير' sections={sections} />);
     fireEvent.click(screen.getByText('تصدير'));
     await waitFor(() => {
       expect(screen.getByText('تقرير بيانات (PDF)')).toBeInTheDocument();
@@ -799,7 +803,7 @@ describe('ExportToolbar (additional coverage)', () => {
 
   it('calls exportDataReport when data report button is clicked', async () => {
     const sections = [{ title: 'قسم 1', data: [{ label: 'A', value: '1' }] }];
-    render(<ExportToolbar tabName="تقرير" sections={sections} />);
+    render(<ExportToolbar tabName='تقرير' sections={sections} />);
     fireEvent.click(screen.getByText('تصدير'));
     await waitFor(() => screen.getByText('تقرير بيانات (PDF)'));
     fireEvent.click(screen.getByText('تقرير بيانات (PDF)'));
@@ -809,14 +813,14 @@ describe('ExportToolbar (additional coverage)', () => {
   });
 
   it('hides data report button when no sections provided', async () => {
-    render(<ExportToolbar tabName="لوحة" />);
+    render(<ExportToolbar tabName='لوحة' />);
     fireEvent.click(screen.getByText('تصدير'));
     await waitFor(() => screen.getByText('لقطة الشاشة (PDF)'));
     expect(screen.queryByText('تقرير بيانات (PDF)')).not.toBeInTheDocument();
   });
 
   it('toggles menu closed when export button is clicked again', async () => {
-    render(<ExportToolbar tabName="لوحة" />);
+    render(<ExportToolbar tabName='لوحة' />);
     fireEvent.click(screen.getByText('تصدير'));
     await waitFor(() => screen.getByText('لقطة الشاشة (PDF)'));
     fireEvent.click(screen.getByText('تصدير'));
@@ -827,7 +831,7 @@ describe('ExportToolbar (additional coverage)', () => {
 
   it('returns null when hasPdfExport feature is not available', () => {
     (hasFeature as jest.Mock).mockReturnValue(false);
-    const { container } = render(<ExportToolbar tabName="لوحة" />);
+    const { container } = render(<ExportToolbar tabName='لوحة' />);
     expect(container.firstChild).toBeNull();
   });
 });
