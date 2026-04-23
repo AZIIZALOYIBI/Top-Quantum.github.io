@@ -41,6 +41,8 @@ import {
   CreditCard,
   Download,
   Key,
+  Trash2,
+  RotateCcw,
 } from 'lucide-react';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -323,6 +325,12 @@ const AdvancedQuantumDashboard: React.FC = () => {
   // Network
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
+  // Actions
+  const [runningAction, setRunningAction] = useState<string | null>(null);
+  const [actionHistory, setActionHistory] = useState<
+    Array<{ id: string; name: string; status: 'success' | 'error'; time: number }>
+  >([]);
+
   // Real-time tick
   useEffect(() => {
     const r = engineRef.current.tick();
@@ -414,6 +422,7 @@ const AdvancedQuantumDashboard: React.FC = () => {
       { id: 'analytics', label: 'تحليل AI', icon: <BarChart3 className='w-5 h-5' /> },
       { id: 'system', label: 'مراقبة النظام', icon: <Server className='w-5 h-5' /> },
       { id: 'network', label: 'الشبكة', icon: <Network className='w-5 h-5' /> },
+      { id: 'actions', label: 'الإجراءات', icon: <Zap className='w-5 h-5' /> },
       { id: 'logs', label: 'السجلات', icon: <FileText className='w-5 h-5' /> },
       { id: 'settings', label: 'الإعدادات', icon: <Settings className='w-5 h-5' /> },
     ],
@@ -1944,6 +1953,314 @@ const AdvancedQuantumDashboard: React.FC = () => {
     );
   };
 
+  // ─── Actions ───────────────────────────────────────────────
+
+  const executeAction = useCallback(
+    (id: string, name: string) => {
+      if (runningAction !== null) return;
+      setRunningAction(id);
+      const duration = 1500 + Math.random() * 2000;
+      setTimeout(() => {
+        const success = Math.random() > 0.1;
+        setActionHistory(prev => [
+          { id, name, status: success ? 'success' : 'error', time: Date.now() },
+          ...prev.slice(0, 19),
+        ]);
+        setRunningAction(null);
+        addNotification(
+          success ? 'system' : 'security',
+          success ? 'اكتمل الإجراء' : 'فشل الإجراء',
+          `${name}: ${success ? 'تم بنجاح' : 'حدث خطأ أثناء التنفيذ'}`
+        );
+      }, duration);
+    },
+    [runningAction, addNotification]
+  );
+
+  const renderActions = () => {
+    interface ActionItem {
+      id: string;
+      name: string;
+      desc: string;
+      icon: React.ReactNode;
+      variant: 'blue' | 'purple' | 'green' | 'orange';
+    }
+    interface ActionGroup {
+      title: string;
+      headerIcon: React.ReactNode;
+      color: string;
+      items: ActionItem[];
+    }
+
+    const variantClasses: Record<ActionItem['variant'], string> = {
+      blue: 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/20',
+      purple: 'bg-purple-600 hover:bg-purple-500 shadow-purple-500/20',
+      green: 'bg-green-600 hover:bg-green-500 shadow-green-500/20',
+      orange: 'bg-orange-600 hover:bg-orange-500 shadow-orange-500/20',
+    };
+
+    const groups: ActionGroup[] = [
+      {
+        title: 'إجراءات النظام',
+        headerIcon: <Terminal className='w-5 h-5 text-blue-400' />,
+        color: '#3b82f6',
+        items: [
+          {
+            id: 'clear-cache',
+            name: 'مسح ذاكرة التخزين',
+            desc: 'حذف جميع البيانات المخزنة مؤقتاً لتحرير الموارد',
+            icon: <Trash2 className='w-5 h-5' />,
+            variant: 'blue',
+          },
+          {
+            id: 'restart-services',
+            name: 'إعادة تشغيل الخدمات',
+            desc: 'إعادة تهيئة جميع خدمات النظام الجارية',
+            icon: <RotateCcw className='w-5 h-5' />,
+            variant: 'blue',
+          },
+          {
+            id: 'backup-data',
+            name: 'نسخ احتياطي',
+            desc: 'إنشاء نسخة احتياطية آمنة من بيانات النظام',
+            icon: <Download className='w-5 h-5' />,
+            variant: 'blue',
+          },
+          {
+            id: 'system-diagnostic',
+            name: 'تشخيص النظام',
+            desc: 'إجراء فحص شامل لصحة جميع مكونات النظام',
+            icon: <Activity className='w-5 h-5' />,
+            variant: 'blue',
+          },
+        ],
+      },
+      {
+        title: 'إجراءات كمية',
+        headerIcon: <Atom className='w-5 h-5 text-purple-400' />,
+        color: '#8b5cf6',
+        items: [
+          {
+            id: 'calibrate-qubits',
+            name: 'معايرة الكيوبتات',
+            desc: 'ضبط وتحسين دقة الكيوبتات للحصول على أفضل أداء',
+            icon: <Atom className='w-5 h-5' />,
+            variant: 'purple',
+          },
+          {
+            id: 'reset-circuits',
+            name: 'إعادة ضبط الدوائر',
+            desc: 'إعادة تهيئة جميع الدوائر الكمية إلى حالتها الأولية',
+            icon: <RefreshCw className='w-5 h-5' />,
+            variant: 'purple',
+          },
+          {
+            id: 'error-correction',
+            name: 'تصحيح الأخطاء',
+            desc: 'تشغيل بروتوكول تصحيح الأخطاء الكمية',
+            icon: <CheckCircle className='w-5 h-5' />,
+            variant: 'purple',
+          },
+          {
+            id: 'quantum-benchmark',
+            name: 'قياس الأداء الكمي',
+            desc: 'تشغيل مجموعة معايير لقياس أداء المعالج الكمي',
+            icon: <BarChart3 className='w-5 h-5' />,
+            variant: 'purple',
+          },
+        ],
+      },
+      {
+        title: 'إجراءات الأمان',
+        headerIcon: <Shield className='w-5 h-5 text-green-400' />,
+        color: '#10b981',
+        items: [
+          {
+            id: 'security-scan',
+            name: 'فحص أمني',
+            desc: 'تشغيل فحص شامل للكشف عن الثغرات والتهديدات',
+            icon: <Eye className='w-5 h-5' />,
+            variant: 'green',
+          },
+          {
+            id: 'rotate-keys',
+            name: 'تدوير المفاتيح',
+            desc: 'تجديد مفاتيح التشفير والوصول تلقائياً',
+            icon: <Key className='w-5 h-5' />,
+            variant: 'green',
+          },
+          {
+            id: 'audit-logs',
+            name: 'مراجعة السجلات',
+            desc: 'تحليل سجلات النظام بحثاً عن الأنشطة المشبوهة',
+            icon: <FileText className='w-5 h-5' />,
+            variant: 'green',
+          },
+          {
+            id: 'lock-system',
+            name: 'قفل النظام',
+            desc: 'تفعيل وضع القفل الأمني لجميع نقاط الوصول',
+            icon: <Lock className='w-5 h-5' />,
+            variant: 'green',
+          },
+        ],
+      },
+      {
+        title: 'إجراءات الذكاء الاصطناعي',
+        headerIcon: <Brain className='w-5 h-5 text-orange-400' />,
+        color: '#f59e0b',
+        items: [
+          {
+            id: 'retrain-models',
+            name: 'إعادة تدريب النماذج',
+            desc: 'تحديث وتدريب نماذج الذكاء الاصطناعي على البيانات الجديدة',
+            icon: <Brain className='w-5 h-5' />,
+            variant: 'orange',
+          },
+          {
+            id: 'sync-agents',
+            name: 'مزامنة الوكلاء',
+            desc: 'مزامنة حالة وكلاء الذكاء الاصطناعي النشطين',
+            icon: <RefreshCw className='w-5 h-5' />,
+            variant: 'orange',
+          },
+          {
+            id: 'export-results',
+            name: 'تصدير النتائج',
+            desc: 'تصدير نتائج التحليل والتنبؤات إلى ملف',
+            icon: <Download className='w-5 h-5' />,
+            variant: 'orange',
+          },
+          {
+            id: 'optimize-models',
+            name: 'تحسين الأداء',
+            desc: 'تشغيل عملية تحسين أداء جميع النماذج النشطة',
+            icon: <TrendingUp className='w-5 h-5' />,
+            variant: 'orange',
+          },
+        ],
+      },
+    ];
+
+    return (
+      <div className='space-y-6'>
+        {/* Action Groups */}
+        {groups.map(group => (
+          <div
+            key={group.title}
+            className='bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden'
+          >
+            <div className='px-6 py-4 border-b border-gray-700/50 flex items-center gap-2'>
+              {group.headerIcon}
+              <h3 className='font-semibold'>{group.title}</h3>
+            </div>
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4'>
+              {group.items.map(action => {
+                const isRunning = runningAction === action.id;
+                const histEntry = actionHistory.find(h => h.id === action.id);
+                return (
+                  <motion.div
+                    key={action.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className='bg-gray-700/30 rounded-xl p-4 border border-gray-600/30 flex flex-col gap-3'
+                  >
+                    <div className='flex items-start justify-between gap-2'>
+                      <div
+                        className='p-2 rounded-lg flex-shrink-0'
+                        style={{ backgroundColor: `${group.color}20`, color: group.color }}
+                      >
+                        {action.icon}
+                      </div>
+                      {histEntry !== null && histEntry !== undefined && !isRunning && (
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 ${
+                            histEntry.status === 'success'
+                              ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                              : 'bg-red-500/20 text-red-400 border-red-500/30'
+                          }`}
+                        >
+                          {histEntry.status === 'success' ? 'نجح' : 'فشل'}
+                        </span>
+                      )}
+                    </div>
+                    <div className='flex-1'>
+                      <p className='text-sm font-medium text-white'>{action.name}</p>
+                      <p className='text-xs text-gray-400 mt-1 leading-relaxed'>{action.desc}</p>
+                    </div>
+                    <button
+                      onClick={() => executeAction(action.id, action.name)}
+                      disabled={runningAction !== null}
+                      className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-white transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed ${variantClasses[action.variant]}`}
+                    >
+                      {isRunning ? (
+                        <>
+                          <RefreshCw className='w-4 h-4 animate-spin' />
+                          جاري التنفيذ...
+                        </>
+                      ) : (
+                        <>
+                          <Play className='w-4 h-4' />
+                          تشغيل
+                        </>
+                      )}
+                    </button>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
+        {/* Action History */}
+        <div className='bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden'>
+          <div className='px-6 py-4 border-b border-gray-700/50 flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
+              <Clock className='w-5 h-5 text-gray-400' />
+              <h3 className='font-semibold'>سجل الإجراءات</h3>
+            </div>
+            {actionHistory.length > 0 && (
+              <button
+                onClick={() => setActionHistory([])}
+                className='text-xs text-gray-500 hover:text-gray-300 flex items-center gap-1 transition-colors'
+              >
+                <Trash2 className='w-3.5 h-3.5' />
+                مسح السجل
+              </button>
+            )}
+          </div>
+          {actionHistory.length === 0 ? (
+            <div className='p-8 text-center text-gray-500 text-sm'>لا توجد إجراءات منفذة بعد</div>
+          ) : (
+            <div className='divide-y divide-gray-700/30 max-h-72 overflow-y-auto'>
+              {actionHistory.map((entry, i) => (
+                <motion.div
+                  key={`${entry.id}-${entry.time}`}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.03 }}
+                  className='px-6 py-3 flex items-center justify-between hover:bg-gray-700/20 transition-colors'
+                >
+                  <div className='flex items-center gap-3'>
+                    {entry.status === 'success' ? (
+                      <CheckCircle className='w-4 h-4 text-green-400 flex-shrink-0' />
+                    ) : (
+                      <XCircle className='w-4 h-4 text-red-400 flex-shrink-0' />
+                    )}
+                    <span className='text-sm text-white'>{entry.name}</span>
+                  </div>
+                  <span className='text-xs text-gray-500'>
+                    {new Date(entry.time).toLocaleTimeString('ar-SA')}
+                  </span>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   // ─── Settings ──────────────────────────────────────────────
 
   const renderSettings = () => (
@@ -2081,6 +2398,8 @@ const AdvancedQuantumDashboard: React.FC = () => {
         return renderSystem();
       case 'network':
         return renderNetwork();
+      case 'actions':
+        return renderActions();
       case 'logs':
         return renderLogs();
       case 'settings':
