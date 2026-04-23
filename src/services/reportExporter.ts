@@ -64,7 +64,7 @@ export function exportDataReport(options: ReportOptions): void {
 
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageWidth = pdf.internal.pageSize.getWidth();
-  let y = 20;
+  let y: number;
 
   // Header
   pdf.setFillColor(15, 23, 42);
